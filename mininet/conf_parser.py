@@ -133,7 +133,7 @@ def parse_links(conf_arq):
             arg_name, arg_value = arg.split('=')
             key = arg_name
             value = arg_value
-            if key in ['bw','jitter','max_queue_size']:
+            if key in ['bw','jitter','max_queue_size','cost']:
                 value = int(value)
             if key in ['loss']:
                 value = float(value)
