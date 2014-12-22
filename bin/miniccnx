@@ -123,41 +123,36 @@ def execute(template_file='miniccnx.conf', testbed=False):
 	#print("IP of " + str(host) +" is "+ip_node[str(host)])
 
     for link in links_conf:
+	print("Links: "+str(link.h1)+"  "+str(link.h2))
 	#print(str(link.h1)+" "+str(link.h2)+" " + str(link.linkDict))
 	host_cost = link.linkDict['cost']
 	for host in net.hosts:
 	    if str(host) == link.h1:
-		if(host.intfList()!=1):
-		    ip = getIP(net, host, link.h2)
-		else:
-		    ip = ip_node[link.h2]		    
-		#print(host.intf()
-		#print("host: "+str(host) + " to " +link.h1 + ": "+ip_node[link.h2])
+		#ip = getIP(net, host, link.h2)
+		for iface in host.intfList():
+		    l1 = iface.link
+		    if(str(l1.intf2.node) == link.h2):
+			ip =  ipNode(net, link.h2, l1.intf2)
+		    if(str(l1.intf1.node) == link.h2):
+			ip =  ipNode(net, link.h2, l1.intf1)
+
 		neighbor += "neighbor\\n{\\nname /ndn/edu/memphis/%C1.Router/cs/"+link.h2+"\\nface-uri udp://"+str(ip)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
-        	#print(host.cmd("cd /home/ashu/Desktop && sudo ./setNeighbor \""+neighbor+"\""))
 	        host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
                 neighbor=""
 	    elif str(host) == link.h2:
-		if(host.intfList()!=1):
-		    ip = getIP(net, host, link.h1)
-		else:
-		    ip = ip_node[link.h1]	
-		neighbor += "neighbor\\n{\\nname /ndn/edu/memphis/%C1.Router/cs/"+link.h1+"\\nface-uri udp://"+str(ip)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
+		#ip = getIP(net, host, link.h1)
+		for iface in host.intfList():
+		    l2 = iface.link
+		    if(str(l2.intf1.node) == link.h1):
+			ip2 = ipNode(net, link.h1, l2.intf1)
+		    if(str(l2.intf2.node) == link.h1):
+			ip2 = ipNode(net, link.h1, l2.intf2)
+		neighbor += "neighbor\\n{\\nname /ndn/edu/memphis/%C1.Router/cs/"+link.h1+"\\nface-uri udp://"+str(ip2)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
 		host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
                 neighbor=""
 
     for host in net.hosts:
-	print(host.cmd("echo $HOME"))
-	print(host.cmd("nlsr -d"))
-
-    #ip_node = open("miniccnx.conf", "wb")
-    #for host in net.hosts:
-	
-	#ip_node.write(host.name)
-	#ip_node.write(" ")
-	#ip_node.write(host.IP())
-	#ip_node.write("\n")
-    #ip_node.close()    
+	host.cmd("nlsr -d")
 
     if testbed == True:
         info('Starting OSPFN ...\n')
@@ -181,21 +176,16 @@ def execute(template_file='miniccnx.conf', testbed=False):
     net.stop()
 
 def getIP(net, node, neighbor):
-	print(str(node) + " connected to " + neighbor)
 	for host in net.hosts:
 	    if str(host) == str(node):
-		#print("host: "+str(host))
 		for iface in host.intfList():
 		    link = iface.link
-		    #print("Link: "+str(link))
-		    #print(str(link.intf2.node) +"("+link.intf2 +"),  neighbor: " + neighbor)
 		    if(str(link.intf2.node) == neighbor):
 			return ipNode(net, neighbor, link.intf2)
 		    elif(str(link.intf1.node) == neighbor):
 			return ipNode(net, neighbor, link.intf1)
 
 def ipNode(net, neighbor, intf):
-	print("Neighbor: "+neighbor + " Interface: " + str(intf))
 	for host in net.hosts:
 	    if(str(host) == neighbor):
 		#print("Neighbor: "+neighbor)
