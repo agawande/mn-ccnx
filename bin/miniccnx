@@ -103,32 +103,13 @@ def execute(template_file='miniccnx.conf', testbed=False):
 
     # Writing neighbors section of NLSR file
     links_conf = parse_links(template_file)
-    host_ip = ""
     host_cost = ""
     neighbor = ""
 
-    #Saving IPs in a dictionary for later use
-    ip_node = {}
-    for host in net.hosts:
-#	print("Host: " + str(host))
-        ip_node[str(host)] = host.IP()
-	#ip_node[str(host)] = host.IP(str(host)"-eth1")
-	#interface = host.intfNames();
-#	for iface in host.intfList():
-#	    print("Interface: "+str(iface))
-#	    link = iface.link
-#	    if link:
-#		print("Link: "+str(link.intf2) + " host1: " +str(link.intf1.node) + " host2: " + str(link.intf2.node))
-#	print("\n")
-	#print("IP of " + str(host) +" is "+ip_node[str(host)])
-
     for link in links_conf:
-	print("Links: "+str(link.h1)+"  "+str(link.h2))
-	#print(str(link.h1)+" "+str(link.h2)+" " + str(link.linkDict))
 	host_cost = link.linkDict['cost']
 	for host in net.hosts:
 	    if str(host) == link.h1:
-		#ip = getIP(net, host, link.h2)
 		for iface in host.intfList():
 		    l1 = iface.link
 		    if(str(l1.intf2.node) == link.h2):
@@ -140,7 +121,6 @@ def execute(template_file='miniccnx.conf', testbed=False):
 	        host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
                 neighbor=""
 	    elif str(host) == link.h2:
-		#ip = getIP(net, host, link.h1)
 		for iface in host.intfList():
 		    l2 = iface.link
 		    if(str(l2.intf1.node) == link.h1):
@@ -152,7 +132,7 @@ def execute(template_file='miniccnx.conf', testbed=False):
                 neighbor=""
 
     for host in net.hosts:
-	host.cmd("nlsr -d")
+	print(host.cmd("nlsr -d"))
 
     if testbed == True:
         info('Starting OSPFN ...\n')
@@ -175,20 +155,9 @@ def execute(template_file='miniccnx.conf', testbed=False):
     CLI(net)
     net.stop()
 
-def getIP(net, node, neighbor):
-	for host in net.hosts:
-	    if str(host) == str(node):
-		for iface in host.intfList():
-		    link = iface.link
-		    if(str(link.intf2.node) == neighbor):
-			return ipNode(net, neighbor, link.intf2)
-		    elif(str(link.intf1.node) == neighbor):
-			return ipNode(net, neighbor, link.intf1)
-
 def ipNode(net, neighbor, intf):
 	for host in net.hosts:
 	    if(str(host) == neighbor):
-		#print("Neighbor: "+neighbor)
 		return host.IP(str(intf))
 
 

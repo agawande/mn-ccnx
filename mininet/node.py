@@ -752,19 +752,19 @@ class CCNHost( Host ):
 
 	# Copy the client.conf file and change the unix socket
         self.cmd("sudo cp ~/mn-ccnx/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
-	self.cmd("sudo sed -i "+"\"2s|.*|unix_socket="+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
+	self.cmd("sudo sed -i "+"\"10s|.*|transport=unix://"+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
+	#unix:///var/run/nfd.sock
         #self.cmd("cd ~/Desktop && sudo ./changeClientPath "+ sockFile + " /tmp/"+self.name+"/.ndn/client.conf")
 
 	self.cmd("cp ~/mn-ccnx/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
 	#self.cmd("sudo sed -i "+"\"9s|.*|router /%C1.Router/cs/"+self.name+"|\"" + " /tmp/"+self.name+"/nlsr.conf")
-	#self.cmd("mkdir log")
 
 	# Change home folder and add delays between starting
         self.cmd("export HOME=/tmp/"+self.name+"/")
 	self.cmd("sudo sed -i "+"\"9s|.*|  router /%C1.Router/cs/"+self.name+"|\"" + " nlsr.conf")
         self.cmd("mkdir log")
-	self.cmd("sudo sed -i "+"\"37s|.*|  log-dir log/|\"" + " nlsr.conf")   #~/log/
-	self.cmd("sudo sed -i "+"\"38s|.*|  seq-dir log/|\"" + " nlsr.conf")
+	self.cmd("sudo sed -i "+"\"37s|.*|  log-dir  log|\"" + " nlsr.conf")   #~/log/
+	self.cmd("sudo sed -i "+"\"38s|.*|  seq-dir /tmp/" +self.name + "/log|\"" + " nlsr.conf")
 	self.cmd("sudo sed -i "+"\"124s|.*|  prefix /ndn/edu/"+self.name+"|\"" + " nlsr.conf")
 
 	time.sleep(0.5)
@@ -858,7 +858,7 @@ class CPULimitedCCNHost( CPULimitedHost ):
         self.cmd("sudo sed -i "+"\"72s|.*|path "+sockFile+"|\""+" /tmp/"+self.name+"/"+self.name+".conf")
         self.cmd("sudo mkdir /tmp/"+self.name+"/.ndn")
         self.cmd("sudo cp ~/mn-ccnx/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
-	self.cmd("sudo sed -i "+"\"2s|.*|unix_socket="+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
+	self.cmd("sudo sed -i "+"\"10s|.*|transport=unix://"+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
 
 	self.cmd("cp ~/mn-ccnx/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
 	#self.cmd("sudo sed -i "+"\"9s|.*|router /%C1.Router/cs/"+self.name+"|\"" + " /tmp/"+self.name+"/nlsr.conf")
@@ -866,8 +866,8 @@ class CPULimitedCCNHost( CPULimitedHost ):
         self.cmd("export HOME=/tmp/"+self.name+"/")
 	self.cmd("sudo sed -i "+"\"9s|.*|  router /%C1.Router/cs/"+self.name+"|\"" + " nlsr.conf")
         self.cmd("mkdir log")
-	self.cmd("sudo sed -i "+"\"37s|.*|  log-dir log/|\"" + " nlsr.conf")
-	self.cmd("sudo sed -i "+"\"38s|.*|  seq-dir log/|\"" + " nlsr.conf")
+	self.cmd("sudo sed -i "+"\"37s|.*|  log-dir log|\"" + " nlsr.conf")
+	self.cmd("sudo sed -i "+"\"38s|.*|  seq-dir /tmp/"+self.name+"/log|\"" + " nlsr.conf")
 	self.cmd("sudo sed -i "+"\"124s|.*|  prefix /ndn/edu/"+self.name+"|\"" + " nlsr.conf")
 
 	time.sleep(0.5)
