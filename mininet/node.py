@@ -775,13 +775,15 @@ class CCNHost( Host ):
         self.peerList = {}
 
 
-    def config( self, fib=None, app=None, cache=None, **params ):
+    def config( self, fib=None, app=None, cache=None, radius=None, angle=None, **params ):
 
         r = Node.config( self, **params )
 
-        self.setParam( r, 'app', fib=fib )
-        self.setParam( r, 'fib', app=app)
+        self.setParam( r, 'app', fib=fib)   # why is this not app=app
+        self.setParam( r, 'fib', app=app)   # and this fib=fib
 	self.setParam( r, 'cache', cache=cache )
+        self.setParam( r, 'radius', radius=radius)
+        self.setParam( r, 'angle', angle=angle)
 
         return r
 
@@ -834,7 +836,7 @@ class CPULimitedCCNHost( CPULimitedHost ):
        It should be used when one wants to limit the resources of CCN routers and hosts '''
 
 
-    def __init__( self, name, sched='cfs', **kwargs ):
+    def __init__( self, name, sched='cfs', **kwargs):
 
         CPULimitedHost.__init__( self, name, sched, **kwargs )
         if not CCNHost.inited:
@@ -877,13 +879,15 @@ class CPULimitedCCNHost( CPULimitedHost ):
 
         self.peerList = {}
 
-    def config( self, fib=None, app=None, cpu=None, cores=None, cache=None, **params):
+    def config( self, fib=None, app=None, cpu=None, cores=None, cache=None, radius=None, angle=None, **params):
 
         r = CPULimitedHost.config(self,cpu,cores, **params)
 
-        self.setParam( r, 'app', fib=fib )
+        self.setParam( r, 'app', fib=fib )   #????? shoud it be app=app
         self.setParam( r, 'fib', app=app)
 	self.setParam( r, 'cache', cache=cache)
+	self.setParam( r, 'radius', radius=radius)
+	self.setParam( r, 'angle', angle=angle)
 
         return r
 
@@ -911,6 +915,11 @@ class CPULimitedCCNHost( CPULimitedHost ):
             else:
                 self.insert_fib(name[0],self.peerList[name[1]])
 
+	#for radius in self.params['radius']:
+         #   if not radius:
+          #      pass
+           # else:
+	#	print(radius)
 
     def insert_fib(self, uri, host):
         self.cmd('ccndc add {0} tcp {1}'.format(uri,host))

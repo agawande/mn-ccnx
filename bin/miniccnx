@@ -103,8 +103,24 @@ def execute(template_file='miniccnx.conf', testbed=False):
 
     # Writing neighbors section of NLSR file
     links_conf = parse_links(template_file)
+    host_conf = parse_hosts(template_file)    # This is being done twice (The parsing of the file, see CCNTopo)
     host_cost = ""
     neighbor = ""
+
+    hyper = True
+    coordinates = {}
+    for host in host_conf:
+	if host.radius == None or host.angle == None:
+	    hyper = False
+	else:
+	    coordinates[host.name] = str(host.radius) + " " + str(host.angle)
+
+    if hyper:
+	for host in net.hosts:
+	    host.cmd("sudo sed -i \'89s|.*|  state on|\' nlsr.conf")
+	    host.cmd("sudo sed -i \'94s|.*|  radius  "+coordinates[str(host)].split()[0]+"|\' nlsr.conf")
+	    host.cmd("sudo sed -i \'95s|.*|  angle  "+coordinates[str(host)].split()[1]+"|\' nlsr.conf")
+	
 
     for link in links_conf:
 	host_cost = link.linkDict['cost']
