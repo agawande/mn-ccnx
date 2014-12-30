@@ -121,7 +121,6 @@ def execute(template_file='miniccnx.conf', testbed=False):
 	    host.cmd("sudo sed -i \'94s|.*|  radius  "+coordinates[str(host)].split()[0]+"|\' nlsr.conf")
 	    host.cmd("sudo sed -i \'95s|.*|  angle  "+coordinates[str(host)].split()[1]+"|\' nlsr.conf")
 	
-
     for link in links_conf:
 	host_cost = link.linkDict['cost']
 	for host in net.hosts:
@@ -134,8 +133,8 @@ def execute(template_file='miniccnx.conf', testbed=False):
 			ip =  ipNode(net, link.h2, l1.intf1)
 
 		neighbor += "neighbor\\n{\\nname /ndn/edu/memphis/%C1.Router/cs/"+link.h2+"\\nface-uri udp://"+str(ip)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
-	        host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
-                neighbor=""
+		host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
+	        neighbor=""
 	    elif str(host) == link.h2:
 		for iface in host.intfList():
 		    l2 = iface.link
@@ -145,7 +144,7 @@ def execute(template_file='miniccnx.conf', testbed=False):
 			ip2 = ipNode(net, link.h1, l2.intf2)
 		neighbor += "neighbor\\n{\\nname /ndn/edu/memphis/%C1.Router/cs/"+link.h1+"\\nface-uri udp://"+str(ip2)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
 		host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
-                neighbor=""
+	        neighbor=""
 
     for host in net.hosts:
 	print(host.cmd("nlsr -d"))
@@ -178,7 +177,6 @@ def ipNode(net, neighbor, intf):
 
 
 if __name__ == '__main__':
-
     template, testbed = parse_args()
     setLogLevel('info')
     execute(template, testbed)

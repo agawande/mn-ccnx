@@ -775,15 +775,13 @@ class CCNHost( Host ):
         self.peerList = {}
 
 
-    def config( self, fib=None, app=None, cache=None, radius=None, angle=None, **params ):
+    def config( self, fib=None, app=None, cache=None, **params ):
 
         r = Node.config( self, **params )
 
         self.setParam( r, 'app', fib=fib)   # why is this not app=app
         self.setParam( r, 'fib', app=app)   # and this fib=fib
 	self.setParam( r, 'cache', cache=cache )
-        self.setParam( r, 'radius', radius=radius)
-        self.setParam( r, 'angle', angle=angle)
 
         return r
 
@@ -879,15 +877,13 @@ class CPULimitedCCNHost( CPULimitedHost ):
 
         self.peerList = {}
 
-    def config( self, fib=None, app=None, cpu=None, cores=None, cache=None, radius=None, angle=None, **params):
+    def config( self, fib=None, app=None, cpu=None, cores=None, cache=None, **params):
 
         r = CPULimitedHost.config(self,cpu,cores, **params)
 
         self.setParam( r, 'app', fib=fib )   #????? shoud it be app=app
         self.setParam( r, 'fib', app=app)
 	self.setParam( r, 'cache', cache=cache)
-	self.setParam( r, 'radius', radius=radius)
-	self.setParam( r, 'angle', angle=angle)
 
         return r
 
