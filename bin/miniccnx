@@ -37,15 +37,15 @@ def parse_args():
 
     return file, testbed
 
-
 class CCNTopo(Topo):
     def __init__(self, conf_arq, **opts):
         Topo.__init__(self, **opts)
 
+	global hosts_conf
+	global links_conf
         hosts_conf = parse_hosts(conf_arq)
 #       routers_conf = parse_routers(conf_arq)
         links_conf = parse_links(conf_arq)
-
 
         self.isTCLink = False
         self.isLimited = False
@@ -102,14 +102,14 @@ def execute(template_file='miniccnx.conf', testbed=False):
     net.start()
 
     # Writing neighbors section of NLSR file
-    links_conf = parse_links(template_file)
-    host_conf = parse_hosts(template_file)    # This is being done twice (The parsing of the file, see CCNTopo)
+    #links_conf = parse_links(template_file)
+    #host_conf = parse_hosts(template_file)    # This is being done twice (The parsing of the file, see CCNTopo)
     host_cost = ""
     neighbor = ""
 
     hyper = True
     coordinates = {}
-    for host in host_conf:
+    for host in hosts_conf:
 	if host.radius == None or host.angle == None:
 	    hyper = False
 	else:
@@ -132,7 +132,7 @@ def execute(template_file='miniccnx.conf', testbed=False):
 		    if(str(l1.intf1.node) == link.h2):
 			ip =  ipNode(net, link.h2, l1.intf1)
 
-		neighbor += "neighbor\\n{\\nname /ndn/edu/memphis/%C1.Router/cs/"+link.h2+"\\nface-uri udp://"+str(ip)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
+		neighbor += "neighbor\\n{\\nname /ndn/edu/%C1.Router/cs/"+link.h2+"\\nface-uri udp://"+str(ip)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
 		host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
 	        neighbor=""
 	    elif str(host) == link.h2:
@@ -142,7 +142,7 @@ def execute(template_file='miniccnx.conf', testbed=False):
 			ip2 = ipNode(net, link.h1, l2.intf1)
 		    if(str(l2.intf2.node) == link.h1):
 			ip2 = ipNode(net, link.h1, l2.intf2)
-		neighbor += "neighbor\\n{\\nname /ndn/edu/memphis/%C1.Router/cs/"+link.h1+"\\nface-uri udp://"+str(ip2)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
+		neighbor += "neighbor\\n{\\nname /ndn/edu/%C1.Router/cs/"+link.h1+"\\nface-uri udp://"+str(ip2)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
 		host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
 	        neighbor=""
 
@@ -177,6 +177,8 @@ def ipNode(net, neighbor, intf):
 
 
 if __name__ == '__main__':
+    hosts_conf = []
+    links_conf = []
     template, testbed = parse_args()
     setLogLevel('info')
     execute(template, testbed)
