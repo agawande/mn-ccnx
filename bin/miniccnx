@@ -21,21 +21,33 @@ def parse_args():
     """
 
     testbed = False
+    pingall = False
     parser = optparse.OptionParser(usage)
 
     parser.add_option("-t", "--testbed", action="store_true", dest="testbed",
     help="instantiates NDN Testbed")
 
+    parser.add_option("--pingall", action="store", dest="pingall", type="int",
+    help="Sequentiall pings all the other nodes from each node")
+
+    parser.add_option("--ctime", action="store", dest="ctime", type="int",
+    help="Specify convergence time for the topology (Default 60 seconds)")
+
     (options, arg) = parser.parse_args()
 
     testbed = options.testbed
+    pingall = options.pingall
+    ctime = options.ctime
+    
+    if ctime is None:
+	ctime = 60
 
     if len(arg) == 0 or len(arg) > 2:
         file = ''
     else:
         file = arg[0]
 
-    return file, testbed
+    return file, testbed, pingall, ctime
 
 class CCNTopo(Topo):
     def __init__(self, conf_arq, **opts):
@@ -70,7 +82,7 @@ class CCNTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='miniccnx.conf', testbed=False):
+def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None):
     "Create a network based on template_file"
 
     if template_file == '':
@@ -109,11 +121,17 @@ def execute(template_file='miniccnx.conf', testbed=False):
 
     hyper = True
     coordinates = {}
+    nodes = ""    # Used later to check prefix name in checkFIB
+    # If hyperbolic coordinates defines for all the nodes then start hyperbolic routing
     for host in hosts_conf:
+	nodes += str(host.name)+","
 	if host.radius == None or host.angle == None:
 	    hyper = False
 	else:
 	    coordinates[host.name] = str(host.radius) + " " + str(host.angle)
+    
+    nodes = nodes[0:-1]
+    #print nodes
 
     if hyper:
 	for host in net.hosts:
@@ -148,6 +166,17 @@ def execute(template_file='miniccnx.conf', testbed=False):
 
     for host in net.hosts:
 	print(host.cmd("nlsr -d"))
+	host.cmd("./checkFIB "+nodes+" "+str(host) +" "+str(ctime)+" &")
+	host.cmd("ndnpingserver /ndn/edu/"+str(host)+" &")
+
+
+    if pingall is not None:
+        time.sleep(ctime)       # waiting the same time as the convergence time before starting ping
+        for host in net.hosts:
+            host.cmd("mkdir ping")
+	    for each in net.hosts:
+	        if(str(host)!=str(each)):
+	            host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping/"+str(each)+".ping")
 
     if testbed == True:
         info('Starting OSPFN ...\n')
@@ -168,6 +197,7 @@ def execute(template_file='miniccnx.conf', testbed=False):
                 host.cmd(host.params['app'])
 
     CLI(net)
+    print("hello")
     net.stop()
 
 def ipNode(net, neighbor, intf):
@@ -179,6 +209,6 @@ def ipNode(net, neighbor, intf):
 if __name__ == '__main__':
     hosts_conf = []
     links_conf = []
-    template, testbed = parse_args()
+    template, testbed, pingall, ctime = parse_args()
     setLogLevel('info')
-    execute(template, testbed)
+    execute(template, testbed, pingall, ctime)
