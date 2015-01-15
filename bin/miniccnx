@@ -22,6 +22,7 @@ def parse_args():
 
     testbed = False
     pingall = False
+    hr = False
     parser = optparse.OptionParser(usage)
 
     parser.add_option("-t", "--testbed", action="store_true", dest="testbed",
@@ -33,21 +34,32 @@ def parse_args():
     parser.add_option("--ctime", action="store", dest="ctime", type="int",
     help="Specify convergence time for the topology (Default 60 seconds)")
 
+    parser.add_option("--hr", action="store_true", dest="hr",
+    help="--hr is used to turn on hyperbolic routing")
+
+    parser.add_option("--faces", action="store", dest="faces", type="int",
+    help="Specify number of faces 0-60")
+
     (options, arg) = parser.parse_args()
 
     testbed = options.testbed
     pingall = options.pingall
     ctime = options.ctime
+    hr = options.hr
+    faces = options.faces
     
     if ctime is None:
 	ctime = 60
+
+    if faces is None:
+	faces = 3
 
     if len(arg) == 0 or len(arg) > 2:
         file = ''
     else:
         file = arg[0]
 
-    return file, testbed, pingall, ctime
+    return file, testbed, pingall, ctime, hr, faces
 
 class CCNTopo(Topo):
     def __init__(self, conf_arq, **opts):
@@ -82,7 +94,7 @@ class CCNTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None):
+def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=None):
     "Create a network based on template_file"
 
     if template_file == '':
@@ -133,7 +145,11 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
     nodes = nodes[0:-1]
     #print nodes
 
-    if hyper:
+    # Number of faces allowed, default is 3
+    for host in net.hosts:
+	host.cmd("sudo sed -i \'106s|.*|  max-faces-per-prefix "+str(faces)+"|\' nlsr.conf")
+
+    if hr and hyper:
 	for host in net.hosts:
 	    host.cmd("sudo sed -i \'89s|.*|  state on|\' nlsr.conf")
 	    host.cmd("sudo sed -i \'94s|.*|  radius  "+coordinates[str(host)].split()[0]+"|\' nlsr.conf")
@@ -173,31 +189,33 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
     if pingall is not None:
         time.sleep(ctime)       # waiting the same time as the convergence time before starting ping
         for host in net.hosts:
-            host.cmd("mkdir ping")
+            host.cmd("mkdir ping-data")
 	    for each in net.hosts:
 	        if(str(host)!=str(each)):
-	            host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping/"+str(each)+".ping")
+	            host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping-data/"+str(each)+".txt")
 
-    if testbed == True:
-        info('Starting OSPFN ...\n')
-        for host in net.hosts:
-            host.cmd("cd {0}".format(host.name))
-            host.cmd("./routing.sh {0}".format(host.name))
+    #if testbed == True:
+     #   info('Starting OSPFN ...\n')
+      #  for host in net.hosts:
+       #     host.cmd("cd {0}".format(host.name))
+       #     host.cmd("./routing.sh {0}".format(host.name))
 
-        time.sleep(60)
+       # time.sleep(60)
 
-        for host in net.hosts:
-            host.cmd("./ospfn-start.sh {0}".format(host.name))
+       # for host in net.hosts:
+       #     host.cmd("./ospfn-start.sh {0}".format(host.name))
 
-        info('OSPFN configuration completed!\n')
+       # info('OSPFN configuration completed!\n')
 
     for host in net.hosts:
         if 'app' in host.params:
             if host.params['app'] != '_':
                 host.cmd(host.params['app'])
 
-    CLI(net)
-    print("hello")
+    #print(net.configLinkStatus("csu", "caida", "down"))
+    #print(net.configLinkStatus("h1", "s1", "down"))
+
+    #CLI(net)
     net.stop()
 
 def ipNode(net, neighbor, intf):
@@ -209,6 +227,6 @@ def ipNode(net, neighbor, intf):
 if __name__ == '__main__':
     hosts_conf = []
     links_conf = []
-    template, testbed, pingall, ctime = parse_args()
+    template, testbed, pingall, ctime, hr, faces = parse_args()
     setLogLevel('info')
-    execute(template, testbed, pingall, ctime)
+    execute(template, testbed, pingall, ctime, hr, faces)

@@ -765,6 +765,8 @@ class CCNHost( Host ):
         self.cmd("sudo nfd --config /tmp/"+self.name+"/"+self.name+".conf 2>>"+self.name+".log &")
         time.sleep(0.5)
         self.cmd("sudo nrd --config /tmp/"+self.name+"/"+self.name+".conf 2>>"+self.name+".log &")
+	time.sleep(0.1)
+	self.cmd("nfdc set-strategy /ndn/edu/"+self.name+"/ping/ ndn:/localhost/nfd/strategy/ncc")
 
         self.peerList = {}
 
