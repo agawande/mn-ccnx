@@ -8,27 +8,22 @@ uiuc: _ radius=21.247178 angle=2.038117
 wustl: _ radius=19.994570 angle=2.035105
 umich: _ radius=19.548038 angle=2.037021
 neu: _ radius=18.335813 angle=2.106513
-memphis: _ radius=17.389593 angle=1.920136
+memphis: _ radius=17.389593 angle=1.925628
 [links]
 ucla:csu delay=16ms cost=16
-ucla:umich delay=33ms cost=33
-ucla:wustl delay=38ms cost=38
-pku:csu delay=104ms cost=104
-pku:caida delay=78ms cost=78
-pku:wustl delay=109ms cost=109
-pku:memphis delay=99ms cost=99
-pku:umich delay=110ms cost=110
-csu:caida delay=18ms cost=18
-csu:wustl delay=19ms cost=19
-csu:memphis delay=21ms cost=21
+ucla:pku delay=79ms cost=79
+ucla:caida delay=2ms cost=2
+ucla:arizona delay=7ms cost=7
+pku:neu delay=115ms cost=115
 csu:uiuc delay=14ms cost=14
 csu:umich delay=15ms cost=15
-csu:neu delay=25ms cost=25
-caida:neu delay=42ms cost=42
+csu:arizona delay=18ms cost=18
 caida:arizona delay=25ms cost=25
-caida:memphis delay=40ms cost=40
+wustl:memphis delay=16ms cost=16
+wustl:arizona delay=33ms cost=33
 wustl:uiuc delay=9ms cost=9
-wustl:umich delay=11ms cost=11
 uiuc:umich delay=6ms cost=6
-arizona:neu delay=35ms cost=35
 arizona:memphis delay=33ms cost=33
+memphis:neu delay=20ms cost=20
+memphis:umich delay=12ms cost=12
+neu:umich delay=14ms cost=14
