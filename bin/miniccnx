@@ -23,7 +23,7 @@ def parse_args():
     testbed = False
     pingall = False
     hr = False
-    faliure = False
+    failure = False
 
     parser = optparse.OptionParser(usage)
 
@@ -52,7 +52,7 @@ def parse_args():
     ctime = options.ctime
     hr = options.hr
     faces = options.faces
-    failure = options.faliure
+    failure = options.failure
     
     if ctime is None:
 	ctime = 60
@@ -207,7 +207,7 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
 			host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping-data/"+str(each)+".txt")
 
 	if failure:
-	    time.sleep(60)   # modification for faliure experiment, sleep for 1 minute (At 4th minute bring down csu)
+	    time.sleep(60)   # modification for failure experiment, sleep for 1 minute (At 4th minute bring down csu)
 	    for host in net.hosts:
 	        if str(host) == "csu":
 		    host.cmd("sudo kill `ps aux | grep nfd| grep sudo | grep csu | awk '/csu.conf/ { print $2}'`")
