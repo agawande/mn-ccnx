@@ -39,7 +39,7 @@ def parse_args():
     parser.add_option("--hr", action="store_true", dest="hr",
     help="--hr is used to turn on hyperbolic routing")
 
-    parser.add_option("--faces", action="store_true", dest="faces", type="int",
+    parser.add_option("--faces", action="store", dest="faces", type="int",
     help="Specify number of faces 0-60")
 
     parser.add_option("--failure", action="store_true", dest="failure",
@@ -189,25 +189,24 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
     for host in net.hosts:
 	host.cmd("nlsr -d")
 	host.cmd("./checkFIB "+nodes+" "+str(host) +" "+str(ctime)+" &")
-	host.cmd("nfdc set-strategy /ndn/edu/"+str(host)+"/ping/ ndn:/localhost/nfd/strategy/ncc > strategy &")
-	host.cmd("ndnpingserver /ndn/edu/"+str(host)+" > pinserver &")
-
+	#host.cmd("nfdc set-strategy /ndn/edu ndn:/localhost/nfd/strategy/ncc &")
+	host.cmd("ndnpingserver /ndn/edu/"+str(host)+" &")
+	#host.cmd("ndndump > dump."+str(host)+" &")
+	#host.cmd("./nfdstatus > status."+str(host) +" &")
 
     if pingall is not None:
         time.sleep(ctime)       # waiting the same time as the convergence time before starting ping
         for host in net.hosts:
             host.cmd("mkdir ping-data")
 	    for each in net.hosts:
-	        if(str(host)!=str(each)):
-		    if failure:
-			if(str(host)!="csu"):
-	                    host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping-data/"+str(each)+".txt &")   #if we add "&" here we make can make parallel ping
-		            time.sleep(.2)
-		    else:
-			host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping-data/"+str(each)+".txt")
+	        if(str(host)!=str(each)):    #if failure: if(str(host)!="csu"):
+		    host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping-data/"+str(each)+".txt &")   #if we add "&" here we make can make parallel ping
+		    time.sleep(.2)
+		    #else:
+			#host.cmd("ndnping -c "+ str(pingall) + " /ndn/edu/"+str(each)+" > ping-data/"+str(each)+".txt")
 
 	if failure:
-	    time.sleep(60)   # modification for failure experiment, sleep for 1 minute (At 4th minute bring down csu)
+	    time.sleep(60)   # modification for faliure experiment, sleep for 1 minute (At 4th minute bring down csu)
 	    for host in net.hosts:
 	        if str(host) == "csu":
 		    host.cmd("sudo kill `ps aux | grep nfd| grep sudo | grep csu | awk '/csu.conf/ { print $2}'`")
@@ -221,7 +220,8 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
 		    host.cmd("sudo nrd --config csu.conf &")
 		    time.sleep(1)
 		    host.cmd("nlsr -d")
-	   	    host.cmd("nfdc set-strategy /ndn/edu/"+str(host)+"/ping/ ndn:/localhost/nfd/strategy/ncc > strategy &")
+	   	    host.cmd("nfdc set-strategy /ndn/edu ndn:/localhost/nfd/strategy/ncc &")
+		    #host.cmd("nfdc set-strategy /ndn/edu/"+str(host)+" ndn:/localhost/nfd/strategy/ncc > strategy &")
 		    host.cmd("ndnpingserver /ndn/edu/"+str(host)+" &")
 	 	    break
 
