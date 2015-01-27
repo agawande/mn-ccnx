@@ -56,6 +56,7 @@ from mininet.util import ( quietRun, errRun, errFail, moveIntf, isShellBuiltin,
                            numCores, retry, mountCgroups, run )
 from mininet.moduledeps import moduleDeps, pathCheck, OVS_KMOD, OF_KMOD, TUN
 from mininet.link import Link, Intf, TCIntf
+import pdb
 
 class Node( object ):
     """A virtual network node is simply a shell in a network namespace.

@@ -32,18 +32,18 @@ def parse_hosts(conf_arq):
 
     hosts = []
 
-    items = config.items('nodes')
+    items = config.items('hosts')
 	
-	#makes a first-pass read to nodes section to find empty nodes sections
+	#makes a first-pass read to hosts section to find empty host sections
     for item in items:
 	name = item[0]
 	rest = item[1].split()
 	if len(rest) == 0:
-		config.set('nodes', name, '_')
+		config.set('hosts', name, '_')
 	#updates 'items' list
-    items = config.items('nodes')
+    items = config.items('hosts')
 
-	#makes a second-pass read to nodes section to properly add hosts
+	#makes a second-pass read to hosts section to properly add hosts
     for item in items:
 
         name = item[0]
@@ -98,7 +98,9 @@ def parse_routers(conf_arq):
         uri_list=[]
         cpu = None
         cores = None
+	cache = None
 
+	# if '_' in uris: pass
         for uri in uris:
             if re.match("cpu",uri):
                 cpu = float(uri.split('=')[1])
@@ -108,6 +110,10 @@ def parse_routers(conf_arq):
                 radius = float(uri.split('=')[1])
             elif re.match("angle",uri):
                 angle = float(uri.split('=')[1])
+	    elif re.match("cache",uri):
+		cache = uri.split('=')[1]
+	    elif re.match("mem",uri):
+		mem = uri.split('=')[1]
             else:
                 uri_list.append((uri.split(',')[0],uri.split(',')[1]))
 
@@ -155,6 +161,3 @@ def parse_links(conf_arq):
 
 
     return links
-
-
-
