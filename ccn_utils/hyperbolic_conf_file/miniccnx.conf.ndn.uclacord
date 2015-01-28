@@ -10,20 +10,20 @@ umich: _ radius=19.548038 angle=2.037021
 neu: _ radius=18.335813 angle=2.106513
 memphis: _ radius=17.389593 angle=1.925628
 [links]
-ucla:csu delay=16ms cost=16
-ucla:pku delay=79ms cost=79
-ucla:caida delay=2ms cost=2
-ucla:arizona delay=7ms cost=7
-pku:neu delay=115ms cost=115
-csu:uiuc delay=14ms cost=14
-csu:umich delay=15ms cost=15
-csu:arizona delay=18ms cost=18
-caida:arizona delay=25ms cost=25
-wustl:memphis delay=16ms cost=16
-wustl:arizona delay=33ms cost=33
-wustl:uiuc delay=9ms cost=9
-uiuc:umich delay=6ms cost=6
-arizona:memphis delay=33ms cost=33
-memphis:neu delay=20ms cost=20
-memphis:umich delay=12ms cost=12
-neu:umich delay=14ms cost=14
+ucla:csu delay=16ms
+ucla:pku delay=79ms
+ucla:caida delay=2ms
+ucla:arizona delay=7ms
+pku:neu delay=115ms
+csu:uiuc delay=14ms
+csu:umich delay=15ms
+csu:arizona delay=18ms
+caida:arizona delay=25ms
+wustl:memphis delay=16ms
+wustl:arizona delay=33ms
+wustl:uiuc delay=9ms
+uiuc:umich delay=6ms
+arizona:memphis delay=33ms
+memphis:neu delay=20ms
+memphis:umich delay=12ms
+neu:umich delay=14ms

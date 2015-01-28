@@ -32,16 +32,16 @@ def parse_hosts(conf_arq):
 
     hosts = []
 
-    items = config.items('hosts')
+    items = config.items('nodes')
 	
 	#makes a first-pass read to hosts section to find empty host sections
     for item in items:
 	name = item[0]
 	rest = item[1].split()
 	if len(rest) == 0:
-		config.set('hosts', name, '_')
+		config.set('nodes', name, '_')
 	#updates 'items' list
-    items = config.items('hosts')
+    items = config.items('nodes')
 
 	#makes a second-pass read to hosts section to properly add hosts
     for item in items:
@@ -80,47 +80,6 @@ def parse_hosts(conf_arq):
 
     return hosts
 
-def parse_routers(conf_arq):
-    'Parse routers section from the conf file.'
-    config = ConfigParser.RawConfigParser()
-    config.read(conf_arq)
-
-    routers = []
-
-    items = config.items('routers')
-
-    for item in items:
-        name = item[0]
-
-        rest = item[1].split()
-
-        uris = rest
-        uri_list=[]
-        cpu = None
-        cores = None
-	cache = None
-
-	# if '_' in uris: pass
-        for uri in uris:
-            if re.match("cpu",uri):
-                cpu = float(uri.split('=')[1])
-            elif re.match("cores",uri):
-                cores = uri.split('=')[1]
-            elif re.match("radius",uri):
-                radius = float(uri.split('=')[1])
-            elif re.match("angle",uri):
-                angle = float(uri.split('=')[1])
-	    elif re.match("cache",uri):
-		cache = uri.split('=')[1]
-	    elif re.match("mem",uri):
-		mem = uri.split('=')[1]
-            else:
-                uri_list.append((uri.split(',')[0],uri.split(',')[1]))
-
-        routers.append(confCCNHost(name=name , uri_tuples=uri_list, cpu=cpu, cores=cores, radius=radius, angle=angle))
-
-    return routers
-
 def parse_links(conf_arq):
     'Parse links section from the conf file.'
     arq = open(conf_arq,'r')
@@ -151,7 +110,7 @@ def parse_links(conf_arq):
             arg_name, arg_value = arg.split('=')
             key = arg_name
             value = arg_value
-            if key in ['bw','jitter','max_queue_size','cost']:
+            if key in ['bw','jitter','max_queue_size']:
                 value = int(value)
             if key in ['loss']:
                 value = float(value)

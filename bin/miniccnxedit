@@ -183,6 +183,22 @@ class HostDialog(CustomDialog):
 	    else: 
 		self.startEntry= Entry(self.propFrame)
 
+	    Label(self.propFrame, text="radius:").grid(row=6, sticky=E)
+            self.radius = Entry(self.propFrame)
+            self.radius.grid(row=6, column=1)
+            Label(self.propFrame, text="decimal").grid(row=6, column=2, sticky=W)
+            if 'radius' in self.prefValues:
+                self.radius.insert(0, str(self.prefValues['radius']))
+
+	    Label(self.propFrame, text="angle:").grid(row=7, sticky=E)
+            self.angle = Entry(self.propFrame)
+            self.angle.grid(row=7, column=1)
+            Label(self.propFrame, text="decimal").grid(row=7, column=2, sticky=W)
+            if 'angle' in self.prefValues:
+                self.angle.insert(0, str(self.prefValues['angle']))
+
+
+
             ### TAB 2
             # FIB Entries
             self.fibEntries = 0
@@ -221,6 +237,8 @@ class HostDialog(CustomDialog):
                        'mem': self.memEntry.get(),
                        'hostname':self.hostnameEntry.get(),
                        'startCommand':self.startEntry.get(),
+		       'radius':self.radius.get(),
+		       'angle':self.angle.get(),
                        'fibEntries':fibEntries}
             self.result = results
 
@@ -425,8 +443,8 @@ class MiniEdit( Frame ):
         self.images = miniEditImages()
         self.buttons = {}
         self.active = None
-        self.tools = ( 'Select', 'Host', 'LegacyRouter', 'NetLink' )
-        self.customColors = { 'LegacyRouter': 'darkGreen', 'Host': 'blue' }
+        self.tools = ( 'Select', 'Host', 'NetLink' )
+        #self.customColors = { 'LegacyRouter': 'darkGreen', 'Host': 'blue' }
         self.toolbar = self.createToolbar()
 
         # Layout
@@ -661,11 +679,11 @@ class MiniEdit( Frame ):
         template = open(self.template_file, 'w')
 
         # hosts
-        template.write('[hosts]\n')
+        template.write('[nodes]\n')
         for widget in self.widgetToItem:
             name = widget[ 'text' ]
             tags = self.canvas.gettags( self.widgetToItem[ widget ] )
-	    #print self.hostOpts[name]
+	    print self.hostOpts[name]
             if 'Host' in tags:
 		hOpts=self.hostOpts[name]
                 template.write(name + ': ')
@@ -681,13 +699,19 @@ class MiniEdit( Frame ):
 		if 'mem' in hOpts:
 			mem=float(hOpts['mem'])/100
 			template.write('mem=' + repr(mem) + ' ')
+		if 'radius' in hOpts:
+			radius=float(hOpts['radius'])
+			template.write('radius=' + repr(radius) + ' ')
+		if 'angle' in hOpts:
+                        angle=float(hOpts['angle'])
+			template.write('angle=' + repr(angle) + ' ')
 		if 'fibEntries' in hOpts:
 			customFib = self.parseFibEntries(hOpts['fibEntries'])
 			template.write(customFib)
 		template.write('\n')
 
         # switches/routers
-        template.write('[routers]\n')
+        #template.write('[routers]\n')
 
         for router in self.routerOpts.values():
 
@@ -735,7 +759,7 @@ class MiniEdit( Frame ):
 	     if 'loss' in linkopts:
 	     	template.write('loss=' + repr(linkopts['loss']) + ' ' )
 	     if 'delay' in linkopts:
-	     	template.write('delay=' + str(linkopts['delay']))
+	     	template.write('delay=' + str(linkopts['delay'])+ 'ms' )
 	     
 	     template.write('\n')
 
@@ -788,7 +812,7 @@ class MiniEdit( Frame ):
         loadedTopology = self.convertJsonUnicode(json.load(f))
 
         # Load hosts
-        hosts = loadedTopology['hosts']
+        hosts = loadedTopology['nodes']
         for host in hosts:
             nodeNum = host['number']
             hostname = 'h'+nodeNum
@@ -1211,9 +1235,9 @@ class MiniEdit( Frame ):
         # For now, don't allow hosts to be directly linked
         stags = self.canvas.gettags( self.widgetToItem[ source ] )
         dtags = self.canvas.gettags( target )
-        if (('Host' in stags and 'Host' in dtags)):
-            self.releaseNetLink( event )
-            return
+        #if (('Host' in stags and 'Host' in dtags)):
+            #self.releaseNetLink( event )
+            #return
 
         # Set link type
         linkType='data'
@@ -1305,6 +1329,14 @@ class MiniEdit( Frame ):
 		        newHostOpts['cache'] = hostBox.result['cache']
 		    if len(hostBox.result['fibEntries']) > 0:
 		        newHostOpts['fibEntries'] = hostBox.result['fibEntries']
+		    if len(hostBox.result['radius']) > 0:
+                        newHostOpts['radius'] = hostBox.result['radius']
+			name = hostBox.result['hostname']
+                        widget[ 'text' ] = name
+		    if len(hostBox.result['angle']) > 0:
+                        newHostOpts['angle'] = hostBox.result['angle']
+			name = hostBox.result['hostname']
+                        widget[ 'text' ] = name
 		    self.hostOpts[name] = newHostOpts
 
 		    print 'New host details for ' + name + ' = ' + str(newHostOpts)
