@@ -6,7 +6,7 @@ from mininet.log import setLogLevel, output, info
 from mininet.cli import CLI
 from mininet.node import CPULimitedCCNHost, CCNHost
 from mininet.link import TCLink
-from mininet.conf_parser import parse_hosts,parse_routers, parse_links
+from mininet.conf_parser import parse_hosts, parse_links
 import os.path, time
 import optparse
 import datetime
