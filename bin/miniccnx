@@ -48,6 +48,9 @@ def parse_args():
     parser.add_option("--failure", action="store_true", dest="failure",
     help="Run failure experiment, specify the number of pings using pingall")
 
+    parser.add_option("--no-cli", action="store_false", dest="isCliEnabled",
+        help="Run experiments and exit without showing the command line interface")
+
     (options, arg) = parser.parse_args()
 
     testbed = options.testbed
@@ -56,6 +59,7 @@ def parse_args():
     hr = options.hr
     faces = options.faces
     failure = options.failure
+    isCliEnabled = options.isCliEnabled
 
     if ctime is None:
 	ctime = 60
@@ -63,12 +67,15 @@ def parse_args():
     if faces is None:
 	faces = 3
 
+    if isCliEnabled is None:
+        isCliEnabled = True
+
     if len(arg) == 0 or len(arg) > 2:
         file = ''
     else:
         file = arg[0]
 
-    return file, testbed, pingall, ctime, hr, faces, failure
+    return file, testbed, pingall, ctime, hr, faces, failure, isCliEnabled
 
 class CCNTopo(Topo):
     def __init__(self, conf_arq, **opts):
@@ -96,7 +103,7 @@ class CCNTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=None, failure=False):
+def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=None, failure=False, isCliEnabled=True):
     "Create a network based on template_file"
 
     if template_file == '':
@@ -189,28 +196,14 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
         test = HyperbolicExperiment(net, nodes, ctime, pingall)
         test.run()
 
-    #if testbed == True:
-     #   info('Starting OSPFN ...\n')
-      #  for host in net.hosts:
-       #     host.cmd("cd {0}".format(host.name))
-       #     host.cmd("./routing.sh {0}".format(host.name))
-
-       # time.sleep(60)
-
-       # for host in net.hosts:
-       #     host.cmd("./ospfn-start.sh {0}".format(host.name))
-
-       # info('OSPFN configuration completed!\n')
-
     for host in net.hosts:
         if 'app' in host.params:
             if host.params['app'] != '_':
                 host.cmd(host.params['app'])
 
-    #print(net.configLinkStatus("csu", "caida", "down"))
-    #print(net.configLinkStatus("h1", "s1", "down"))
+    if isCliEnabled is True:
+        CLI(net)
 
-    CLI(net)
     net.stop()
 
 def ipNode(net, neighbor, intf):
@@ -222,6 +215,7 @@ def ipNode(net, neighbor, intf):
 if __name__ == '__main__':
     hosts_conf = []
     links_conf = []
-    template, testbed, pingall, ctime, hr, faces, failure = parse_args()
+    template, testbed, pingall, ctime, hr, faces, failure, isCliEnabled = parse_args()
+
     setLogLevel('info')
-    execute(template, testbed, pingall, ctime, hr, faces, failure)
+    execute(template, testbed, pingall, ctime, hr, faces, failure, isCliEnabled)
