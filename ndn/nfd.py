@@ -44,7 +44,7 @@ class Nfd:
         self.node.cmd("sudo nfd --config %s 2>> %s &" % (self.confFile, self.logFile))
         time.sleep(2)
 
-        self.node.cmd("sudo nrd --config %s 2>> %s &" % (self.confFile, self.logFile))
+        self.node.cmd("nrd --config %s 2>> %s &" % (self.confFile, self.logFile))
         time.sleep(2)
 
         self.isRunning = True
