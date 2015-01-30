@@ -1,20 +1,23 @@
 #!/usr/bin/python
 
+from ndn.nlsr import Nlsr
+
 import time
 
 class HyperbolicExperiment:
 
     def __init__(self, net, nodes, convergenceTime, nPings):
-                self.net = net
-                self.nodes = nodes
-                self.convergenceTime = convergenceTime
-                self.nPings = nPings
+        self.net = net
+        self.nodes = nodes
+        self.convergenceTime = convergenceTime
+        self.nPings = nPings
 
     def run(self):
         for host in self.net.hosts:
 
             # Start NLSR
-            host.cmd("nlsr -d")
+            nlsr = Nlsr(host)
+            nlsr.start()
 
             # Schedule convergence check
             host.cmd("./checkFIB "+ self.nodes + " " + host.name + " " + str(self.convergenceTime) + " &")

@@ -58,6 +58,8 @@ from mininet.moduledeps import moduleDeps, pathCheck, OVS_KMOD, OF_KMOD, TUN
 from mininet.link import Link, Intf, TCIntf
 import pdb
 
+from ndn.nfd import Nfd
+
 class Node( object ):
     """A virtual network node is simply a shell in a network namespace.
        We communicate with it using pipes."""
@@ -728,47 +730,8 @@ class CCNHost( Host ):
         if not CCNHost.inited:
             CCNHost.init()
 
-	# Create home directory for a node
-	self.cmd("cd /tmp && mkdir "+self.name)
-        self.cmd("cd "+self.name)
-
-	# Copy nfd.conf file from mn-ccnx/ccn_utils to the node's home
-        confFile = self.name+".conf";
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/nfd.conf "+confFile)
-        sockFile = "/var/run/"+self.name+".sock"
-
-        # Copy file that checks FIB
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/checkFIB /tmp/"+self.name +"/checkFIB")
-	#self.cmd("sudo chmod a+x checkFIB")
-
-	# Open the conf file and change socket file name
-	self.cmd("sudo sed -i "+"\"72s|.*|path "+sockFile+"|\""+" /tmp/"+self.name+"/"+self.name+".conf")
-	self.cmd("sudo mkdir /tmp/"+self.name+"/.ndn")
-
-	# Copy the client.conf file and change the unix socket
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
-	self.cmd("sudo sed -i "+"\"10s|.*|transport=unix://"+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
-        #self.cmd("cd ~/Desktop && sudo ./changeClientPath "+ sockFile + " /tmp/"+self.name+"/.ndn/client.conf")
-
-	self.cmd("cp ~/mn-ccnx/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
-
-	# Change home folder and add delays between starting
-        self.cmd("export HOME=/tmp/"+self.name+"/")
-
-	# Configure basic router information in nlsr.conf based on host name 
-	self.cmd("sudo sed -i "+"\"9s|.*|  router /%C1.Router/cs/"+self.name+"|\"" + " nlsr.conf")
-        self.cmd("mkdir log")
-	self.cmd("sudo sed -i "+"\"37s|.*|  log-dir  log|\"" + " nlsr.conf")   #~/log/
-	self.cmd("sudo sed -i "+"\"38s|.*|  seq-dir /tmp/" +self.name + "/log|\"" + " nlsr.conf")
-	self.cmd("sudo sed -i "+"\"124s|.*|  prefix /ndn/edu/"+self.name+"|\"" + " nlsr.conf")
-
-	time.sleep(0.5)
-        self.cmd("sudo nfd --config /tmp/"+self.name+"/"+self.name+".conf 2>>"+self.name+".log &")
-        time.sleep(0.5)
-        self.cmd("sudo nrd --config /tmp/"+self.name+"/"+self.name+".conf 2>>"+self.name+".log &")
-	time.sleep(0.5)
-	#self.cmd("nfdc set-strategy /ndn/edu/"+self.name+"/ping/ ndn:/localhost/nfd/strategy/ncc")
-	#time.sleep(0.5)
+        self.nfd = Nfd(self)
+        self.nfd.start()
 
         self.peerList = {}
 
@@ -814,7 +777,7 @@ class CCNHost( Host ):
 
     def terminate( self ):
         "Stop node."
-	self.cmd('nfd-stop')
+        self.nfd.stop()
         self.cmd('ccndstop')
         self.cmd('killall -r zebra ospf')
         Host.terminate(self)
@@ -838,34 +801,8 @@ class CPULimitedCCNHost( CPULimitedHost ):
         if not CCNHost.inited:
             CCNHost.init()
 
-	self.cmd("cd /tmp && mkdir "+self.name)
-        self.cmd("cd "+self.name)
-
-        confFile = self.name+".conf";
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/nfd.conf "+confFile)
-        sockFile = "/var/run/"+self.name+".sock"
-
-        self.cmd("sudo sed -i "+"\"72s|.*|path "+sockFile+"|\""+" /tmp/"+self.name+"/"+self.name+".conf")
-        self.cmd("sudo mkdir /tmp/"+self.name+"/.ndn")
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
-	self.cmd("sudo sed -i "+"\"10s|.*|transport=unix://"+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
-
-	self.cmd("cp ~/mn-ccnx/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
-        
-        self.cmd("export HOME=/tmp/"+self.name+"/")
-	self.cmd("sudo sed -i "+"\"9s|.*|  router /%C1.Router/cs/"+self.name+"|\"" + " nlsr.conf")
-        self.cmd("mkdir log")
-	self.cmd("sudo sed -i "+"\"37s|.*|  log-dir log|\"" + " nlsr.conf")
-	self.cmd("sudo sed -i "+"\"38s|.*|  seq-dir /tmp/"+self.name+"/log|\"" + " nlsr.conf")
-	self.cmd("sudo sed -i "+"\"124s|.*|  prefix /ndn/edu/"+self.name+"|\"" + " nlsr.conf")
-
-	time.sleep(0.5)
-        self.cmd("sudo nfd --config /tmp/"+self.name+"/"+self.name+".conf 2>>"+self.name+".log &")
-        time.sleep(0.5)
-        self.cmd("sudo nrd --config /tmp/"+self.name+"/"+self.name+".conf 2>>"+self.name+".log &")
-	time.sleep(0.5)
-        #self.cmd("nfdc set-strategy /ndn/edu/"+self.name+"/ping/ ndn:/localhost/nfd/strategy/ncc")
-        #time.sleep(0.5)
+        self.nfd = Nfd(self)
+        self.nfd.start()
 
         self.peerList = {}
 
@@ -915,7 +852,7 @@ class CPULimitedCCNHost( CPULimitedHost ):
 
     def terminate( self ):
         "Stop node."
-	self.cmd('nfd-stop')
+        self.nfd.stop()
         self.cmd('ccndstop')
         self.cmd('killall -r zebra ospf')
         Host.terminate(self)
