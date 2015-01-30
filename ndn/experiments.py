@@ -15,10 +15,6 @@ class HyperbolicExperiment:
     def run(self):
         for host in self.net.hosts:
 
-            # Start NLSR
-            nlsr = Nlsr(host)
-            nlsr.start()
-
             # Schedule convergence check
             host.cmd("./checkFIB "+ self.nodes + " " + host.name + " " + str(self.convergenceTime) + " &")
 

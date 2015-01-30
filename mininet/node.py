@@ -835,6 +835,8 @@ class CPULimitedCCNHost( CPULimitedHost ):
 
 
     def setFIB(self):
+        # TODO: Fix key error caused by NLSR configuration parameters
+        return
 
         for name in self.params['fib']:
             if not name:

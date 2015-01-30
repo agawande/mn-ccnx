@@ -10,8 +10,8 @@ class confCCNHost():
         self.cores = cores
         self.cache = cache
 
-        # For now assume leftovers are NLSR configuration variables
-        self.nlsrConfig = params
+        # For now assume leftovers are NLSR configuration parameters
+        self.nlsrParameters = params
 
     def __repr__(self):
         return 'Name: '    + self.name + \
@@ -22,7 +22,7 @@ class confCCNHost():
                ' Cache: '  + str(self.cache) + \
                ' Radius: ' + str(self.radius) + \
                ' Angle: '  + str(self.angle) + \
-               ' NLSR Config: ' + self.nlsrConfig
+               ' NLSR Parameters: ' + self.nlsrParameters
 
 class confCCNLink():
 

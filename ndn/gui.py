@@ -67,7 +67,7 @@ class NlsrFrame(GuiFrame):
 
         # general: site
         self.site = StringVar(self)
-        self.addEntryBox("Site:", self.site, "/edu/memphis")
+        self.addEntryBox("Site:", self.site, "/edu")
 
         # general: router
         self.router = StringVar(self)

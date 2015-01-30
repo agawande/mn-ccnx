@@ -3,6 +3,7 @@ TEST = mininet/test/*.py
 EXAMPLES = examples/*.py
 MN = bin/mn
 BIN = $(MN)
+NDN = ndn/*.py
 PYSRC = $(MININET) $(TEST) $(EXAMPLES) $(BIN) $(NDN)
 MNEXEC = mnexec
 MANPAGES = mn.1 mnexec.1
@@ -56,7 +57,7 @@ mn.1: $(MN)
 
 mnexec.1: mnexec
 	help2man -N -n "execution utility for Mininet." \
-	-h "-h" -v "-v" --no-discard-stderr ./$< -o $@ 
+	-h "-h" -v "-v" --no-discard-stderr ./$< -o $@
 
 .PHONY: doc
 

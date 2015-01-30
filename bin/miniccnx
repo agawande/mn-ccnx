@@ -14,6 +14,8 @@ import os.path, time
 import optparse
 import datetime
 
+from ndn.nlsr import Nlsr, NlsrConfigGenerator
+
 def parse_args():
     usage="""Usage: miniccnx [template_file] [ -t | --testbed ]
     If no template_file is given, will try to load template
@@ -64,9 +66,6 @@ def parse_args():
     if ctime is None:
 	ctime = 60
 
-    if faces is None:
-	faces = 3
-
     if isCliEnabled is None:
         isCliEnabled = True
 
@@ -103,7 +102,7 @@ class CCNTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=None, failure=False, isCliEnabled=True):
+def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isCliEnabled=True):
     "Create a network based on template_file"
 
     if template_file == '':
@@ -134,61 +133,30 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
 
     net.start()
 
-    # Writing neighbors section of NLSR file
-    #links_conf = parse_links(template_file)
-    #host_conf = parse_hosts(template_file)    # This is being done twice (The parsing of the file, see CCNTopo)
-    host_cost = ""
-    neighbor = ""
-
-    hyper = True
-    coordinates = {}
     nodes = ""    # Used later to check prefix name in checkFIB
-    # If hyperbolic coordinates defines for all the nodes then start hyperbolic routing
-    for host in hosts_conf:
-        nlsrConfig = host.nlsrConfig
-	nodes += str(host.name)+","
-	if host.nlsrConfig['radius'] == None or host.nlsrConfig['angle'] == None:
-	    hyper = False
-	else:
-	    coordinates[host.name] = str(nlsrConfig['radius']) + " " + str(nlsrConfig['angle'])
+
+    # NLSR initialization
+    for host in net.hosts:
+        nodes += str(host.name) + ","
+
+        conf = next(x for x in hosts_conf if x.name == host.name)
+        host.nlsrParameters = conf.nlsrParameters
+
+        if faces is not None:
+            host.nlsrParameters["max-faces-per-prefix"] = faces
+
+        if hr is True:
+            host.nlsrParameters["hyperbolic-state"] = "on"
+
+        # Generate NLSR configuration file
+        configGenerator = NlsrConfigGenerator(host)
+        configGenerator.createConfigFile()
+
+        # Start NLSR
+        nlsr = Nlsr(host)
+        nlsr.start()
 
     nodes = nodes[0:-1]
-    #print nodes
-
-    # Number of faces allowed, default is 3
-    for host in net.hosts:
-	host.cmd("sudo sed -i \'106s|.*|  max-faces-per-prefix "+str(faces)+"|\' nlsr.conf")
-
-    if hr and hyper:
-	for host in net.hosts:
-	    host.cmd("sudo sed -i \'89s|.*|  state on|\' nlsr.conf")
-	    host.cmd("sudo sed -i \'94s|.*|  radius  "+coordinates[str(host)].split()[0]+"|\' nlsr.conf")
-	    host.cmd("sudo sed -i \'95s|.*|  angle  "+coordinates[str(host)].split()[1]+"|\' nlsr.conf")
-
-    for link in links_conf:
-	host_cost = str(link.linkDict['delay'])[:-2]
-	for host in net.hosts:
-	    if str(host) == link.h1:
-		for iface in host.intfList():
-		    l1 = iface.link
-		    if(str(l1.intf2.node) == link.h2):
-			ip =  ipNode(net, link.h2, l1.intf2)
-		    if(str(l1.intf1.node) == link.h2):
-			ip =  ipNode(net, link.h2, l1.intf1)
-
-		neighbor += "neighbor\\n{\\nname /ndn/edu/%C1.Router/cs/"+link.h2+"\\nface-uri udp://"+str(ip)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
-		host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
-	        neighbor=""
-	    elif str(host) == link.h2:
-		for iface in host.intfList():
-		    l2 = iface.link
-		    if(str(l2.intf1.node) == link.h1):
-			ip2 = ipNode(net, link.h1, l2.intf1)
-		    if(str(l2.intf2.node) == link.h1):
-			ip2 = ipNode(net, link.h1, l2.intf2)
-		neighbor += "neighbor\\n{\\nname /ndn/edu/%C1.Router/cs/"+link.h1+"\\nface-uri udp://"+str(ip2)+"\\nlink-cost "+str(host_cost) + "\\n}\\n"
-		host.cmd("sudo sed -i \'70i\'\""+neighbor+"\" nlsr.conf")
-	        neighbor=""
 
     if failure is True:
         test = FailureExperiment(net, nodes, ctime)
