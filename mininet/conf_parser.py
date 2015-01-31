@@ -2,18 +2,27 @@ import ConfigParser, re
 
 class confCCNHost():
 
-    def __init__(self, name, app='', uri_tuples='', cpu=None, cores=None, cache=None, radius=None, angle=None):
+    def __init__(self, name, app='', params='', cpu=None, cores=None, cache=None):
         self.name = name
         self.app = app
-        self.uri_tuples = uri_tuples
+        self.uri_tuples = params
         self.cpu = cpu
         self.cores = cores
-	self.cache = cache
-	self.radius = radius
-	self.angle = angle
+        self.cache = cache
+
+        # For now assume leftovers are NLSR configuration variables
+        self.nlsrConfig = params
 
     def __repr__(self):
-        return 'Name: ' + self.name + ' App: ' + self.app + ' URIS: ' + str(self.uri_tuples) + ' CPU:' + str(self.cpu) + ' Cores:' +str(self.cores) + ' Cache: ' + str(self.cache) + ' Radius: ' + str(self.radius) + ' Angle: ' + str(self.angle)
+        return 'Name: '    + self.name + \
+               ' App: '    + self.app + \
+               ' URIS: '   + str(self.uri_tuples) + \
+               ' CPU: '    + str(self.cpu) + \
+               ' Cores: '  + str(self.cores) + \
+               ' Cache: '  + str(self.cache) + \
+               ' Radius: ' + str(self.radius) + \
+               ' Angle: '  + str(self.angle) + \
+               ' NLSR Config: ' + self.nlsrConfig
 
 class confCCNLink():
 
@@ -33,7 +42,7 @@ def parse_hosts(conf_arq):
     hosts = []
 
     items = config.items('nodes')
-	
+
 	#makes a first-pass read to hosts section to find empty host sections
     for item in items:
 	name = item[0]
@@ -53,30 +62,24 @@ def parse_hosts(conf_arq):
         app = rest.pop(0)
 
         uris = rest
-        uri_list=[]
+        params = {}
         cpu = None
         cores = None
-	cache = None
-	radius = None
-	angle = None
+        cache = None
 
         for uri in uris:
             if re.match("cpu",uri):
                 cpu = float(uri.split('=')[1])
             elif re.match("cores",uri):
                 cores = uri.split('=')[1]
-	    elif re.match("cache",uri):
-		cache = uri.split('=')[1]
-	    elif re.match("mem",uri):
-		mem = uri.split('=')[1]
-	    elif re.match("radius",uri):
-		radius = float(uri.split('=')[1])
-	    elif re.match("angle",uri):
-		angle = float(uri.split('=')[1])
+            elif re.match("cache",uri):
+                cache = uri.split('=')[1]
+            elif re.match("mem",uri):
+                mem = uri.split('=')[1]
             else:
-                uri_list.append((uri.split(',')[0],uri.split(',')[1]))
+                params[uri.split('=')[0]] = uri.split('=')[1]
 
-        hosts.append(confCCNHost(name , app, uri_list,cpu,cores,cache,radius,angle))
+        hosts.append(confCCNHost(name, app, params, cpu, cores, cache))
 
     return hosts
 
@@ -97,7 +100,7 @@ def parse_links(conf_arq):
             break
 
         args = line.split()
-	
+
 	#checks for non-empty line
 	if len(args) == 0:
 		continue

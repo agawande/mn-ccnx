@@ -145,11 +145,12 @@ def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=No
     nodes = ""    # Used later to check prefix name in checkFIB
     # If hyperbolic coordinates defines for all the nodes then start hyperbolic routing
     for host in hosts_conf:
+        nlsrConfig = host.nlsrConfig
 	nodes += str(host.name)+","
-	if host.radius == None or host.angle == None:
+	if host.nlsrConfig['radius'] == None or host.nlsrConfig['angle'] == None:
 	    hyper = False
 	else:
-	    coordinates[host.name] = str(host.radius) + " " + str(host.angle)
+	    coordinates[host.name] = str(nlsrConfig['radius']) + " " + str(nlsrConfig['angle'])
 
     nodes = nodes[0:-1]
     #print nodes

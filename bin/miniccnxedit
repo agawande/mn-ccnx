@@ -57,6 +57,9 @@ MININET_VERSION = re.sub(r'[^\d\.]', '', VERSION)
 if StrictVersion(MININET_VERSION) > StrictVersion('2.0'):
     from mininet.node import IVSSwitch
 
+
+from ndn.gui import NfdFrame, NlsrFrame
+
 TOPODEF = 'none'
 TOPOS = { 'minimal': lambda: SingleSwitchTopo( k=2 ),
           'linear': LinearTopo,
@@ -135,8 +138,17 @@ class HostDialog(CustomDialog):
             n = Notebook(self.rootFrame)
             self.propFrame = Frame(n)
             self.fibFrame = Frame(n)
+
+            # NDN
+            self.nfdFrame = NfdFrame(n)
+            self.nlsrFrame = NlsrFrame(n)
+
             n.add(self.propFrame, text='Properties')
             n.add(self.fibFrame, text='FIB Entries')
+
+            n.add(self.nfdFrame, text=self.nfdFrame.frameLabel)
+            n.add(self.nlsrFrame, text=self.nlsrFrame.frameLabel)
+
             n.pack()
 
             ### TAB 1
@@ -154,7 +166,7 @@ class HostDialog(CustomDialog):
 	    Label(self.propFrame, text="%").grid(row=2, column=2, sticky=W)
             if 'cpu' in self.prefValues:
                 self.cpuEntry.insert(0, str(self.prefValues['cpu']))
-            
+
 	    # Field for Memory
             Label(self.propFrame, text="Amount MEM:").grid(row=3, sticky=E)
             self.memEntry = Entry(self.propFrame)
@@ -162,7 +174,7 @@ class HostDialog(CustomDialog):
 	    Label(self.propFrame, text="%").grid(row=3, column=2, sticky=W)
             if 'mem' in self.prefValues:
                 self.memEntry.insert(0, str(self.prefValues['mem']))
-	    
+
 	    # Field for Cache
             Label(self.propFrame, text="Amount CACHE:").grid(row=4, sticky=E)
             self.cacheEntry = Entry(self.propFrame)
@@ -180,24 +192,8 @@ class HostDialog(CustomDialog):
 		    Label(self.propFrame, text="[full path]").grid(row=5, column=2, sticky=W)
 		    if 'startCommand' in self.prefValues:
 		        self.startEntry.insert(0, str(self.prefValues['startCommand']))
-	    else: 
+	    else:
 		self.startEntry= Entry(self.propFrame)
-
-	    Label(self.propFrame, text="radius:").grid(row=6, sticky=E)
-            self.radius = Entry(self.propFrame)
-            self.radius.grid(row=6, column=1)
-            Label(self.propFrame, text="decimal").grid(row=6, column=2, sticky=W)
-            if 'radius' in self.prefValues:
-                self.radius.insert(0, str(self.prefValues['radius']))
-
-	    Label(self.propFrame, text="angle:").grid(row=7, sticky=E)
-            self.angle = Entry(self.propFrame)
-            self.angle.grid(row=7, column=1)
-            Label(self.propFrame, text="decimal").grid(row=7, column=2, sticky=W)
-            if 'angle' in self.prefValues:
-                self.angle.insert(0, str(self.prefValues['angle']))
-
-
 
             ### TAB 2
             # FIB Entries
@@ -237,9 +233,10 @@ class HostDialog(CustomDialog):
                        'mem': self.memEntry.get(),
                        'hostname':self.hostnameEntry.get(),
                        'startCommand':self.startEntry.get(),
-		       'radius':self.radius.get(),
-		       'angle':self.angle.get(),
-                       'fibEntries':fibEntries}
+                       'fibEntries':fibEntries,
+                       'nlsr': self.nlsrFrame.getValues()
+            }
+
             self.result = results
 
 class VerticalScrolledTable(LabelFrame):
@@ -248,10 +245,10 @@ class VerticalScrolledTable(LabelFrame):
     * Use the 'interior' attribute to place widgets inside the scrollable frame
     * Construct and pack/place/grid normally
     * This frame only allows vertical scrolling
-    
+
     """
     def __init__(self, parent, rows=2, columns=2, title=None, *args, **kw):
-        LabelFrame.__init__(self, parent, text=title, padx=5, pady=5, *args, **kw)            
+        LabelFrame.__init__(self, parent, text=title, padx=5, pady=5, *args, **kw)
 
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = Scrollbar(self, orient=VERTICAL)
@@ -412,7 +409,7 @@ class MiniEdit( Frame ):
     "A simple network editor for MiniCCNx."
 
     def __init__( self, parent=None, cheight=600, cwidth=1000, template_file='miniccnx.conf' ):
-	
+
 	self.template_file = template_file
 
         Frame.__init__( self, parent )
@@ -528,7 +525,7 @@ class MiniEdit( Frame ):
         fileMenu.add_command( label="Generate", font=font, command=self.doGenerate )
         fileMenu.add_separator()
         fileMenu.add_command( label='Quit', command=self.quit, font=font )
-	
+
         editMenu = Menu( mbar, tearoff=False )
         mbar.add_cascade( label="Edit", font=font, menu=editMenu )
         editMenu.add_command( label="Cut", font=font,
@@ -666,7 +663,7 @@ class MiniEdit( Frame ):
     def parseFibEntries ( self, fibEntries ):
 	"Parse FIB Entries for write"
 	result=''
-	
+
 	for fibEntry in fibEntries:
 		entry = ','.join(map(str, fibEntry))
 		result += entry + ' '
@@ -699,15 +696,21 @@ class MiniEdit( Frame ):
 		if 'mem' in hOpts:
 			mem=float(hOpts['mem'])/100
 			template.write('mem=' + repr(mem) + ' ')
-		if 'radius' in hOpts:
-			radius=float(hOpts['radius'])
-			template.write('radius=' + repr(radius) + ' ')
-		if 'angle' in hOpts:
-                        angle=float(hOpts['angle'])
-			template.write('angle=' + repr(angle) + ' ')
 		if 'fibEntries' in hOpts:
 			customFib = self.parseFibEntries(hOpts['fibEntries'])
 			template.write(customFib)
+                if 'nlsr' in hOpts:
+                        values = hOpts['nlsr']
+
+                        template.write('hyperbolic-state=' + values['hyperbolic-state'] + ' ')
+                        template.write('radius=' + values['radius'] + ' ')
+                        template.write('angle=' + values['angle'] + ' ')
+                        template.write('network=' + values['network'] + ' ')
+                        template.write('router=' + values['router'] + ' ')
+                        template.write('site=' + values['site'] + ' ')
+                        template.write('log-level=' + values['log-level'] + ' ')
+                        template.write('max-faces-per-prefix=' + values['max-faces-per-prefix'] + ' ')
+
 		template.write('\n')
 
         # switches/routers
@@ -719,7 +722,7 @@ class MiniEdit( Frame ):
 	    routerName=router['hostname']
 	    #nodetype=router['nodetype']
 	    #nodenum=router['nodenum']
-	    
+
 	    rOpts=self.routerOpts[routerName]
 
 	    template.write(routerName + ': ')
@@ -760,7 +763,7 @@ class MiniEdit( Frame ):
 	     	template.write('loss=' + repr(linkopts['loss']) + ' ' )
 	     if 'delay' in linkopts:
 	     	template.write('delay=' + str(linkopts['delay'])+ 'ms' )
-	     
+
 	     template.write('\n')
 
 	template.close()
@@ -824,6 +827,7 @@ class MiniEdit( Frame ):
                 host['opts']['nodeNum'] = int(nodeNum)
             x = host['x']
             y = host['y']
+
             self.addNode('Host', nodeNum, float(x), float(y), name=hostname)
 
             # Fix JSON converting tuple to list when saving
@@ -1241,14 +1245,14 @@ class MiniEdit( Frame ):
 
         # Set link type
         linkType='data'
-	
+
 	self.createDataLinkBindings()
         c.itemconfig(self.link, tags=c.gettags(self.link)+(linkType,))
 
         x, y = c.coords( target )
         c.coords( self.link, self.linkx, self.linky, x, y )
         self.addLink( source, dest, linktype=linkType )
-        
+
         # We're done
         self.link = self.linkWidget = None
 
@@ -1276,7 +1280,7 @@ class MiniEdit( Frame ):
 	    line5 = Label( about, text=author3, font='Helvetica 9', bg=bg )
             line6 = Label( about, text=enhancements, font='Helvetica 9', bg=bg )
             line7 = Entry( about, font='Helvetica 9', bg=bg, width=len(www), justify=CENTER )
-	    
+
 
             line7.insert(0, www)
             line7.configure(state='readonly')
@@ -1329,14 +1333,9 @@ class MiniEdit( Frame ):
 		        newHostOpts['cache'] = hostBox.result['cache']
 		    if len(hostBox.result['fibEntries']) > 0:
 		        newHostOpts['fibEntries'] = hostBox.result['fibEntries']
-		    if len(hostBox.result['radius']) > 0:
-                        newHostOpts['radius'] = hostBox.result['radius']
-			name = hostBox.result['hostname']
-                        widget[ 'text' ] = name
-		    if len(hostBox.result['angle']) > 0:
-                        newHostOpts['angle'] = hostBox.result['angle']
-			name = hostBox.result['hostname']
-                        widget[ 'text' ] = name
+
+                    newHostOpts['nlsr'] = hostBox.nlsrFrame.getValues()
+
 		    self.hostOpts[name] = newHostOpts
 
 		    print 'New host details for ' + name + ' = ' + str(newHostOpts)
@@ -1414,7 +1413,7 @@ class MiniEdit( Frame ):
 
         widget = self.itemToWidget[ item ]
         tags = self.canvas.gettags(item)
-            
+
         for link in widget.links.values():
             # Delete from view and model
             self.deleteItem( link )
