@@ -18,7 +18,7 @@ from optparse import OptionParser
 from Tkinter import *
 from ttk import Notebook
 from tkMessageBox import showinfo, showerror, showwarning
-from subprocess import call
+from subprocess import call, Popen
 import tkFont
 import csv
 import tkFileDialog
@@ -28,6 +28,7 @@ import json
 from distutils.version import StrictVersion
 import os
 import sys
+import threading
 from functools import partial
 
 import pdb
@@ -74,6 +75,16 @@ HOSTDEF = 'proc'
 HOSTS = { 'proc': Host,
           'rt': custom( CPULimitedHost, sched='rt' ),
           'cfs': custom( CPULimitedHost, sched='cfs' ) }
+
+def runMiniNdn(window, template):
+    # Hide window
+    window.withdraw()
+
+    proc = Popen("sudo miniccnx %s" % template, shell=True)
+    proc.wait()
+
+    # Restore window
+    window.deiconify()
 
 class LegacyRouter( Node ):
 
@@ -523,6 +534,7 @@ class MiniEdit( Frame ):
         fileMenu.add_command( label="Open", font=font, command=self.loadTopology )
         fileMenu.add_command( label="Save", font=font, command=self.saveTopology )
         fileMenu.add_command( label="Generate", font=font, command=self.doGenerate )
+        fileMenu.add_command( label="Run", font=font, command=self.doRun )
         fileMenu.add_separator()
         fileMenu.add_command( label='Quit', command=self.quit, font=font )
 
@@ -659,6 +671,19 @@ class MiniEdit( Frame ):
 	label1.pack()
 	b=Button(toplevel, text="Ok", width=5, command=toplevel.destroy)
 	b.pack(side='bottom', padx=0,pady=0)
+
+    def doRun( self ):
+        "Use current configuration to generate a template and run the topology"
+
+        # Generate temporary template file
+        old_template_file = self.template_file
+        self.template_file = "/tmp/tmp.conf"
+        self.doGenerate()
+
+        thread = threading.Thread(target=runMiniNdn, args=(self.master, self.template_file))
+        thread.start()
+
+        self.template_file = old_template_file
 
     def parseFibEntries ( self, fibEntries ):
 	"Parse FIB Entries for write"
