@@ -80,7 +80,7 @@ def runMiniNdn(window, template):
     # Hide window
     window.withdraw()
 
-    proc = Popen("sudo miniccnx %s" % template, shell=True)
+    proc = Popen("sudo minindn %s" % template, shell=True)
     proc.wait()
 
     # Restore window
@@ -419,7 +419,7 @@ class MiniEdit( Frame ):
 
     "A simple network editor for MiniCCNx."
 
-    def __init__( self, parent=None, cheight=600, cwidth=1000, template_file='miniccnx.conf' ):
+    def __init__( self, parent=None, cheight=600, cwidth=1000, template_file='minindn.conf' ):
 
 	self.template_file = template_file
 
@@ -1518,7 +1518,7 @@ class MiniEdit( Frame ):
                  "invoke the Miniccnx CLI, and run tests." )
 
         usage = ( '%prog [options] [template_file]\n'
-		  '\nIf no template_file is given, generated template will be written to the file miniccnx.conf in the current directory.\n'
+		  '\nIf no template_file is given, generated template will be written to the file minindn.conf in the current directory.\n'
                   'Type %prog -h for details)' )
 
         opts = OptionParser( description=desc, usage=usage )

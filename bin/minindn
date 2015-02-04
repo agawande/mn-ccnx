@@ -17,11 +17,11 @@ import datetime
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 
 def parse_args():
-    usage="""Usage: miniccnx [template_file] [ -t | --testbed ]
+    usage="""Usage: minindn [template_file] [ -t | --testbed ]
     If no template_file is given, will try to load template
-    from file miniccnx.conf in the current directory.
-    If --testbed is used, miniccnx will run the NDN Project Testbed.
-    This assumes you are in the testbed directory in the miniccnx installation
+    from file minindn.conf in the current directory.
+    If --testbed is used, minindn will run the NDN Project Testbed.
+    This assumes you are in the testbed directory in the minindn installation
     directory.
     """
 
@@ -102,14 +102,14 @@ class CCNTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
-def execute(template_file='miniccnx.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isCliEnabled=True):
+def execute(template_file='minindn.conf', testbed=False, pingall=None, ctime=None, hr=False, faces=3, failure=False, isCliEnabled=True):
     "Create a network based on template_file"
 
     if template_file == '':
-        template_file='miniccnx.conf'
+        template_file='minindn.conf'
 
     if os.path.exists(template_file) == False:
-        info('No template file given and default template file miniccnx.conf not found. Exiting...\n')
+        info('No template file given and default template file minindn.conf not found. Exiting...\n')
         quit()
 
     topo = CCNTopo(template_file)

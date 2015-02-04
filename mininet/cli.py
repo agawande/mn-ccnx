@@ -40,7 +40,7 @@ from mininet.node import CCNHost
 class CLI( Cmd ):
     "Simple command-line interface to talk to nodes."
 
-    prompt = 'miniccnx> '
+    prompt = 'minindn> '
 
     def __init__( self, mininet, stdin=sys.stdin, script=None ):
         self.mn = mininet
@@ -202,7 +202,7 @@ class CLI( Cmd ):
         for node in self.nodelist:
             output( '%s: %s\n' %
                     ( node.name, ','.join( node.intfNames() ) ) )
-            
+
     def do_ccndump(self, _line):
         "Dump FIB entries"
         for node in self.nodelist:
@@ -211,7 +211,7 @@ class CLI( Cmd ):
                 for name in node.params['fib']:
                     output(str(name) + ' ')
                 output('\n')
-           
+
 
     def do_dump( self, _line ):
         "Dump node info."
