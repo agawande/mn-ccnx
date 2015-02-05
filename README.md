@@ -1,10 +1,10 @@
-Mini-CCNx: Rapid Prototyping for CCN networks
-========================================================
+Mini-NDN
+========
 
-### What is Mini-CCNx?
+### What is Mini-NDN?
 
-Mini-CCNx is a Mininet fork that aims at extending Mininet to support
-the emulation of CCNx nodes. 
+Mini-NDN is a fork of Mini-CCNx that uses NFD and NLSR to emulate
+an NDN network and support research in NDN development.
 
 
 ### Installation
@@ -13,7 +13,7 @@ See `INSTALL` for installation instructions and details.
 
 ### Documentation
 
-[Mini-CCNx Wiki](https://github.com/carlosmscabral/mn-ccnx/wiki).
+[Mini-NDN Redmine](http://redmine.named-data.net/projects/mini-ndn).
 
 ### Credits
 
@@ -28,4 +28,9 @@ The Mini-CCNx team:
 
 * Carlos Cabral
 * Christian Esteve Rothenberg
+
+The Mini-NDN team:
+
+* Ashlesh Gawande
+* Vince Lehman
 
