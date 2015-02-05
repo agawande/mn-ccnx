@@ -19,10 +19,10 @@ class Nfd:
         self.clientConf = "%s/client.conf" % self.ndnFolder
 
         # Copy file that checks FIB
-        node.cmd("sudo cp ~/mn-ccnx/ccn_utils/checkFIB %s/checkFIB" % self.homeFolder)
+        node.cmd("sudo cp ~/mn-ndn/ccn_utils/checkFIB %s/checkFIB" % self.homeFolder)
 
-        # Copy nfd.conf file from mn-ccnx/ccn_utils to the node's home
-        node.cmd("sudo cp ~/mn-ccnx/ccn_utils/nfd.conf %s" % self.confFile)
+        # Copy nfd.conf file from mn-ndn/ccn_utils to the node's home
+        node.cmd("sudo cp ~/mn-ndn/ccn_utils/nfd.conf %s" % self.confFile)
 
         # Open the conf file and change socket file name
         node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.confFile))
@@ -31,11 +31,11 @@ class Nfd:
         node.cmd("sudo mkdir %s" % self.ndnFolder)
 
         # Copy the client.conf file and change the unix socket
-        node.cmd("sudo cp ~/mn-ccnx/ccn_utils/client.conf.sample %s" % self.clientConf)
+        node.cmd("sudo cp ~/mn-ndn/ccn_utils/client.conf.sample %s" % self.clientConf)
         node.cmd("sudo sed -i 's|nfd.sock|%s.sock|g' %s" % (node.name, self.clientConf))
 
         # Copy NLSR configuration file before changing home folder
-        node.cmd("sudo cp ~/mn-ccnx/ccn_utils/nlsr.conf %s/nlsr.conf" % self.homeFolder)
+        node.cmd("sudo cp ~/mn-ndn/ccn_utils/nlsr.conf %s/nlsr.conf" % self.homeFolder)
 
         # Change home folder
         node.cmd("export HOME=%s" % self.homeFolder)

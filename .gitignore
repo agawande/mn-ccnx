@@ -19,3 +19,4 @@ debian
 .fuse*
 .project
 .pydev*
+.DS*

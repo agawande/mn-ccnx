@@ -731,13 +731,13 @@ class CCNHost( Host ):
 	self.cmd("cd /tmp && mkdir "+self.name)
         self.cmd("cd "+self.name)
 
-	# Copy nfd.conf file from mn-ccnx/ccn_utils to the node's home
+	# Copy nfd.conf file from mn-ndn/ccn_utils to the node's home
         confFile = self.name+".conf";
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/nfd.conf "+confFile)
+        self.cmd("sudo cp ~/mn-ndn/ccn_utils/nfd.conf "+confFile)
         sockFile = "/var/run/"+self.name+".sock"
 
         # Copy file that checks FIB
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/checkFIB /tmp/"+self.name +"/checkFIB")
+        self.cmd("sudo cp ~/mn-ndn/ccn_utils/checkFIB /tmp/"+self.name +"/checkFIB")
 	#self.cmd("sudo chmod a+x checkFIB")
 
 	# Open the conf file and change socket file name
@@ -745,16 +745,16 @@ class CCNHost( Host ):
 	self.cmd("sudo mkdir /tmp/"+self.name+"/.ndn")
 
 	# Copy the client.conf file and change the unix socket
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
+        self.cmd("sudo cp ~/mn-ndn/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
 	self.cmd("sudo sed -i "+"\"10s|.*|transport=unix://"+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
         #self.cmd("cd ~/Desktop && sudo ./changeClientPath "+ sockFile + " /tmp/"+self.name+"/.ndn/client.conf")
 
-	self.cmd("cp ~/mn-ccnx/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
+	self.cmd("cp ~/mn-ndn/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
 
 	# Change home folder and add delays between starting
         self.cmd("export HOME=/tmp/"+self.name+"/")
 
-	# Configure basic router information in nlsr.conf based on host name 
+	# Configure basic router information in nlsr.conf based on host name
 	self.cmd("sudo sed -i "+"\"9s|.*|  router /%C1.Router/cs/"+self.name+"|\"" + " nlsr.conf")
         self.cmd("mkdir log")
 	self.cmd("sudo sed -i "+"\"37s|.*|  log-dir  log|\"" + " nlsr.conf")   #~/log/
@@ -841,16 +841,16 @@ class CPULimitedCCNHost( CPULimitedHost ):
         self.cmd("cd "+self.name)
 
         confFile = self.name+".conf";
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/nfd.conf "+confFile)
+        self.cmd("sudo cp ~/mn-ndn/ccn_utils/nfd.conf "+confFile)
         sockFile = "/var/run/"+self.name+".sock"
 
         self.cmd("sudo sed -i "+"\"72s|.*|path "+sockFile+"|\""+" /tmp/"+self.name+"/"+self.name+".conf")
         self.cmd("sudo mkdir /tmp/"+self.name+"/.ndn")
-        self.cmd("sudo cp ~/mn-ccnx/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
+        self.cmd("sudo cp ~/mn-ndn/ccn_utils/client.conf.sample /tmp/"+self.name+"/.ndn/client.conf")
 	self.cmd("sudo sed -i "+"\"10s|.*|transport=unix://"+sockFile+"|\""+ " /tmp/"+self.name+"/.ndn/client.conf")
 
-	self.cmd("cp ~/mn-ccnx/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
-        
+	self.cmd("cp ~/mn-ndn/ccn_utils/nlsr.conf /tmp/"+self.name+"/nlsr.conf")
+
         self.cmd("export HOME=/tmp/"+self.name+"/")
 	self.cmd("sudo sed -i "+"\"9s|.*|  router /%C1.Router/cs/"+self.name+"|\"" + " nlsr.conf")
         self.cmd("mkdir log")
