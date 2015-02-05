@@ -19,7 +19,7 @@ class HyperbolicExperiment:
             host.cmd("./checkFIB "+ self.nodes + " " + host.name + " " + str(self.convergenceTime) + " &")
 
             # Set strategy
-            #host.cmd("nfdc set-strategy /ndn/edu ndn:/localhost/nfd/strategy/ncc &")
+            host.cmd("nfdc set-strategy /ndn/edu ndn:/localhost/nfd/strategy/ncc &")
 
             # Start ping server
             host.cmd("ndnpingserver /ndn/edu/"+str(host)+" &")
@@ -72,9 +72,9 @@ class FailureExperiment(HyperbolicExperiment):
         for host in self.net.hosts:
             if host.name == "csu":
                 host.cmd("sudo nfd --config csu.conf &")
-                time.sleep(1)
-                host.cmd("sudo nrd --config csu.conf &")
-                time.sleep(1)
+                time.sleep(2)
+                host.cmd("nrd --config csu.conf &")
+                time.sleep(2)
                 host.cmd("nlsr -d")
                 host.cmd("nfdc set-strategy /ndn/edu ndn:/localhost/nfd/strategy/ncc &")
                 #host.cmd("nfdc set-strategy /ndn/edu/"+str(host)+" ndn:/localhost/nfd/strategy/ncc > strategy &")
