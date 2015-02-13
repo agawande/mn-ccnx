@@ -42,6 +42,11 @@ class Nfd:
 
     def start(self):
         self.node.cmd("sudo nfd --config %s 2>> %s &" % (self.confFile, self.logFile))
+	self.nfdpid = self.node.cmd("echo $!")[:-1]
+	#print(type(self.nfdpid))
+	#self.nfdpid = self.node.popen("sudo nfd --config %s 2>> %s &" % (self.confFile, self.logFile))
+	#print(len(str(self.nfdpid)))
+	#print(self.nfdpid)
         time.sleep(2)
 
         self.node.cmd("nrd --config %s 2>> %s &" % (self.confFile, self.logFile))

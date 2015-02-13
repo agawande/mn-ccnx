@@ -16,13 +16,13 @@ class HyperbolicExperiment:
         for host in self.net.hosts:
 
             # Schedule convergence check
-            host.cmd("./checkFIB "+ self.nodes + " " + host.name + " " + str(self.convergenceTime) + " &")
+            #host.cmd("./checkFIB "+ self.nodes + " " + host.name + " " + str(self.convergenceTime) + " &")
 
             # Set strategy
             host.cmd("nfdc set-strategy /ndn/edu ndn:/localhost/nfd/strategy/ncc &")
 
             # Start ping server
-            host.cmd("ndnpingserver /ndn/edu/"+str(host)+" &")
+            host.cmd("ndnpingserver /ndn/edu/"+str(host)+" > ping-server &")
 
             # Create folder to store ping data
             host.cmd("mkdir ping-data")
@@ -37,6 +37,22 @@ class HyperbolicExperiment:
         print "Waiting " + str(self.convergenceTime) + " seconds for convergence..."
         time.sleep(self.convergenceTime)
         print "...done"
+
+
+	# Checking for convergence
+	for host in self.net.hosts:
+            statusRouter = host.cmd("nfd-status -b | grep /ndn/edu/%C1.Router/cs/")  # This check will be after the time out
+            statusPrefix = host.cmd("nfd-status -b | grep /ndn/edu/")
+            list_node = self.nodes.split(",")
+            convergence = True
+            for node in list_node:
+                    if "/ndn/edu/%C1.Router/cs/"+node not in statusRouter:
+                        convergence = False
+                    if str(host) != node and "/ndn/edu/"+node not in statusPrefix:
+                        convergence = False
+
+	    host.cmd("echo " + str(convergence) + " > result &")
+
 
         for host in self.net.hosts:
             for other in self.net.hosts:
@@ -62,7 +78,15 @@ class FailureExperiment(HyperbolicExperiment):
         # Bring down CSU
         for host in self.net.hosts:
             if host.name == "csu":
-                host.cmd("sudo kill `ps aux | grep nfd| grep sudo | grep csu | awk '/csu.conf/ { print $2}'`")
+                #host.cmd("sudo kill `ps aux | grep nfd| grep sudo | grep csu | awk '/csu.conf/ { print $2}'`")
+		print("bringing csu down")
+		#pid = host.cmd("head -n 1 nfd-pid")
+		#print(len(pid))
+		#print(host.nfd.nfdpid.pid)
+		host.cmd("sudo kill " + host.nfd.nfdpid + " &")
+		#print(host.nfd.nfdpid.terminate())
+		#print(host.cmd("ps aux | grep nfd | wc -l"))
+		#host.nfd.nfdpid.terminate()
                 break
 
         # CSU is down for 2 minutes
@@ -71,14 +95,16 @@ class FailureExperiment(HyperbolicExperiment):
         # Bring CSU back up
         for host in self.net.hosts:
             if host.name == "csu":
-                host.cmd("sudo nfd --config csu.conf &")
+		print("csu up")
+                host.cmd("sudo nfd --config csu.conf 2>> csu2.log &")
                 time.sleep(2)
-                host.cmd("nrd --config csu.conf &")
+                host.cmd("nrd --config csu.conf 2>> csu-nrd.log &")
                 time.sleep(2)
                 host.cmd("nlsr -d")
                 host.cmd("nfdc set-strategy /ndn/edu ndn:/localhost/nfd/strategy/ncc &")
                 #host.cmd("nfdc set-strategy /ndn/edu/"+str(host)+" ndn:/localhost/nfd/strategy/ncc > strategy &")
-                host.cmd("ndnpingserver /ndn/edu/" + host.name + " &")
+                host.cmd("ndnpingserver /ndn/edu/" + str(host) + " > ping-server &")
+		#print(host.cmd("ps aux | grep nfd | wc -l"))
                 break
 
         # Collect pings for 1 minute
